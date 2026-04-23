@@ -59,28 +59,30 @@ app.use('/api/v1/search', searchRoutes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-  // Try multiple possible paths for client dist
-  const possiblePaths = [
-    path.join(__dirname, '../../client/dist'),
-    path.join(process.cwd(), 'client/dist'),
-    path.join(process.cwd(), '../client/dist')
-  ];
-  
-  let clientDistPath = possiblePaths[0];
-  for (const p of possiblePaths) {
-    if (require('fs').existsSync(p)) {
-      clientDistPath = p;
-      break;
-    }
-  }
+  const rootDir = process.cwd();
+  // In monorepo, if started from root: ./client/dist
+  // If started from server: ../client/dist
+  const clientDistPath = require('fs').existsSync(path.join(rootDir, 'client/dist'))
+    ? path.join(rootDir, 'client/dist')
+    : path.join(rootDir, '../client/dist');
 
-  console.log(`Serving static files from: ${clientDistPath}`);
+  console.log(`[Production] Serving assets from: ${clientDistPath}`);
+  
   app.use(express.static(clientDistPath));
   
   app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(clientDistPath, 'index.html'));
+    // Prevent infinite loops for missing API routes
+    if (req.path.startsWith('/api/v1')) {
+      return res.status(404).json({ error: 'API route not found' });
     }
+    
+    const indexPath = path.join(clientDistPath, 'index.html');
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error('Error sending index.html:', err);
+        res.status(500).send('Error loading the application. Please check if the client build exists.');
+      }
+    });
   });
 }
 
