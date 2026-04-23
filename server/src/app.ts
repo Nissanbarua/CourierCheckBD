@@ -22,10 +22,10 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "blob:"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       imgSrc: ["'self'", "data:", "https://*", "http://*"], // Allow all images for logos
-      connectSrc: ["'self'", "http://localhost:5000", "http://localhost:5173"],
+      connectSrc: ["'self'", "https://*", "http://*"], // Allow connecting to APIs
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
@@ -59,7 +59,22 @@ app.use('/api/v1/search', searchRoutes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-  const clientDistPath = path.join(__dirname, '../../client/dist');
+  // Try multiple possible paths for client dist
+  const possiblePaths = [
+    path.join(__dirname, '../../client/dist'),
+    path.join(process.cwd(), 'client/dist'),
+    path.join(process.cwd(), '../client/dist')
+  ];
+  
+  let clientDistPath = possiblePaths[0];
+  for (const p of possiblePaths) {
+    if (require('fs').existsSync(p)) {
+      clientDistPath = p;
+      break;
+    }
+  }
+
+  console.log(`Serving static files from: ${clientDistPath}`);
   app.use(express.static(clientDistPath));
   
   app.get('*', (req, res) => {
