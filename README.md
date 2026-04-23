@@ -2,6 +2,12 @@
 
 A complete fraud detection web application for Bangladeshi e-commerce sellers. This application allows merchants to look up customer delivery history across multiple courier services by searching with a Bangladeshi phone number.
 
+![Home Page](./screenshots/home.png)
+*Home Page - Minimalist and easy to use*
+
+![Results Page](./screenshots/results.png)
+*Results Page - Comprehensive courier insights and fraud scoring*
+
 ## Features
 - **Unified Search:** Check customer history across Pathao, Steadfast, Paperfly, RedX, eCourier, and Sundarban.
 - **Fraud Scoring:** Intelligent algorithm calculates a risk score (0-100) based on return rates and cancellation history.
