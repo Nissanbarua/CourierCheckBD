@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { SearchResponse } from '../types/courier.types';
 
-const API_BASE_URL = '/api/v1';
+// In production, this should be your Railway/Render backend URL
+// In development, it uses the Vite proxy
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
